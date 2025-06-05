@@ -19,3 +19,5 @@ I have two neural models that need to be trained, the shallow and deep network. 
  Inference: This folder has scripts related to testing and training the models. 
 
  Vosk: local subfolder for the vosk asr model dependencies. 
+
+ Important Notes: For the deep neural net you will have to have git lfs enabled to download it. Its correct size is 116 MB if it is less thant it is not the correct weights file. 

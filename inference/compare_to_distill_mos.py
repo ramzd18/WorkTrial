@@ -9,7 +9,7 @@ import joblib
 from simple_neural_model import SimpleNeuralMOSPredictor
 from run_inference_deep_network import load_model
 
-def pad_or_truncate(audio, target_length=32000): 
+def pad_or_truncate(audio, target_length=16000): 
     if len(audio) > target_length:
         return audio[:target_length]
     elif len(audio) < target_length:

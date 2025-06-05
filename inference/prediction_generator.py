@@ -14,7 +14,7 @@ def main():
     print("Loading dataset...")
     data = load_dataset("urgent-challenge/urgent2024_mos")
     
-    subset_size = 500
+    subset_size = 50
     test_data = data["test"].shuffle(seed=90).select(range(subset_size))
     print(f"Processing {len(test_data)} samples...")
     extractor = AudioFeatureExtractor()    
