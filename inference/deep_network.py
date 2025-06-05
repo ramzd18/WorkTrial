@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchaudio.transforms as T
-from inference.data_loader import get_dataloaders
+from data_loader import get_dataloaders
 from tqdm import tqdm
 
 class SpectrogramCNN(nn.Module):
