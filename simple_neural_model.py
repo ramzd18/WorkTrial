@@ -47,7 +47,8 @@ class SimpleNeuralMOSPredictor:
                              'duration', 'clipping_ratio', 'reverberation_slope', 
                              'envelope_kurtosis', 'spectral_centroid_mean', 'spectral_centroid_std',
                              'spectral_rolloff_mean', 'spectral_rolloff_std', 
-                             'spectral_flux_mean', 'spectral_flux_std']
+                             'spectral_flux_mean', 'spectral_flux_std'
+                             ]
             
             for feat_name in scalar_features:
                 feature_vector.append(features.get(feat_name, 0))

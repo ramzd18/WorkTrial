@@ -42,16 +42,21 @@ class RulesBasedMOSPredictor:
         if clipping > self.clipping_threshold:
             score -= 1.5
         
-        env_kurtosis = features.get('envelope_kurtosis', 0)
-        if env_kurtosis > 10:
-            score -= 1.0
-        elif env_kurtosis > 5:
-            score -= 0.5
+        # env_kurtosis = features.get('envelope_kurtosis', 0)
+        # if env_kurtosis > 10:
+        #     score -= 1.0
+        # elif env_kurtosis > 5:
+        #     score -= 0.5
         
         # Spectral quality check
         spectral_centroid_mean = features.get('spectral_centroid_mean', 1000)
         if spectral_centroid_mean < 500 or spectral_centroid_mean > 4000:
             score -= 0.5
+        # srmr = features.get('srmr', 0)
+        # if srmr < 0.5:
+        #     score -= 1.0
+        # elif srmr < 0.7:
+        #     score -= 0.5
         
         # Clip to valid MOS range
         return max(1.0, min(5.0, score))
