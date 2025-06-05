@@ -7,7 +7,7 @@ from torch.utils.data import Dataset, DataLoader, random_split
 from simple_feature_extraction import AudioFeatureExtractor
 
 class MOSDataset(Dataset):
-    def __init__(self, data_path='data/mos_scores.json'):
+    def __init__(self, data_path='./data/mos_scores.json'):
         self.mos_scores = json.load(open(data_path))
         self.data = []
         
@@ -73,19 +73,14 @@ def get_dataloaders(train_ratio=0.8, batch_size=1, num_workers=0):  # Set num_wo
     """
     full_dataset = MOSDataset()
     
-    # First, take a subset of 400 samples from the full dataset
-    total_samples = 400  # We want 400 total samples
-    indices = torch.randperm(len(full_dataset))[:total_samples]
-    subset_dataset = torch.utils.data.Subset(full_dataset, indices)
+   
+    train_size = int(0.75 * len(full_dataset))  # 300 samples for training
+    test_size = len(full_dataset) - train_size  # 100 samples for testing
     
-    # Now split the subset into train and test
-    train_size = int(0.75 * total_samples)  # 300 samples for training
-    test_size = total_samples - train_size  # 100 samples for testing
-    
-    print(f"Splitting subset: total={total_samples}, train={train_size}, test={test_size}")
+    print(f"Splitting subset: total={len(full_dataset)}, train={train_size}, test={test_size}")
     
     train_dataset, test_dataset = random_split(
-        subset_dataset, 
+        full_dataset, 
         [train_size, test_size],
         generator=torch.Generator().manual_seed(42)  
     )

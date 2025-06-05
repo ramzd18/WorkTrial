@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchaudio.transforms as T
-from data_loader import get_dataloaders
+from inference.data_loader import get_dataloaders
 from tqdm import tqdm
 
 class SpectrogramCNN(nn.Module):
@@ -119,12 +119,12 @@ class MultiModalMOSPredictor(nn.Module):
         num_chunks = audio_length // self.chunk_size
         # No chunking: process the whole audio in one shot with the CNN
         spec_features = self.spectrogram_cnn(audio)
-        print("SPEC FEATURES SHAPE", spec_features.shape)
+        # print("SPEC FEATURES SHAPE", spec_features.shape)
         temporal_input = spec_features.unsqueeze(1)  # Add sequence dimension for LSTM compatibility
         temporal_features = self.temporal_lstm(temporal_input)
-        print("TEMPORAL FEATURES SHAPE", temporal_features.shape)
+        # print("TEMPORAL FEATURES SHAPE", temporal_features.shape)
         combined_features = torch.cat([temporal_features, processed_features], dim=1)
-        print("COMBINED FEATURES SHAPE", combined_features.shape)
+        # print("COMBINED FEATURES SHAPE", combined_features.shape)
         output = self.fusion_network(combined_features)
         # print("FINSIHED W THAT")
         output = self.output_activation(output) * 4 + 1
@@ -219,3 +219,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    print("DONE")

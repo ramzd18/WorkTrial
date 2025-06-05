@@ -32,7 +32,7 @@ def process_audio(audio_path, model, device='cuda' if torch.cuda.is_available() 
 
 def main():
     parser = argparse.ArgumentParser(description='Run MOS prediction on audio files')
-    parser.add_argument('--model_path', type=str, default='mos_deep_network.pth',
+    parser.add_argument('--model_path', type=str, default='inference/mos_deep_network.pth',
                       help='Path to the saved model')
     parser.add_argument('--audio_path', type=str, default="data/somos/somos_16.wav",
                       help='Path to the audio file or directory')
