@@ -1,14 +1,14 @@
+# Rules-based MOS prediction using heuristics
 class RulesBasedMOSPredictor:
-    """Rules-based MOS prediction using heuristics"""
     
     def __init__(self):
         self.snr_thresholds = {'excellent': 25, 'good': 15, 'fair': 5, 'poor': 0}
         self.silence_thresholds = {'excellent': 0.1, 'good': 0.2, 'fair': 0.4, 'poor': 1.0}
         self.speaking_rate_range = {'min': 1.0, 'max': 4.0}  
         self.clipping_threshold = 0.01  
-        
+
+    # Predict MOS for a single sample using rules
     def predict_single(self, features):
-        """Predict MOS for a single sample using rules"""
         score = 5.0 
         
         snr = features.get('snr', 0)
@@ -42,6 +42,6 @@ class RulesBasedMOSPredictor:
             score -= 0.5   
         return max(1.0, min(5.0, score))
     
+    # Predict MOS for multiple samples
     def predict(self, features_list):
-        """Predict MOS for multiple samples"""
         return [self.predict_single(features) for features in features_list]

@@ -9,8 +9,11 @@ import torch
 from run_inference_deep_network import load_model
 import numpy as np
 
+# Test all three models on a test set of the urgent dataset
+# 1. Rules-based approach
+# 2. Small Neural network approach
+# 3. Deep Neural network approach
 def main():
-    """Main function to demonstrate both approaches"""
     print("Loading dataset...")
     data = load_dataset("urgent-challenge/urgent2024_mos")
     

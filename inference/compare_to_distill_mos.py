@@ -9,6 +9,7 @@ import joblib
 from simple_neural_model import SimpleNeuralMOSPredictor
 from run_inference_deep_network import load_model
 
+# Pad audio to certain length for distillmos model
 def pad_or_truncate(audio, target_length=16000): 
     if len(audio) > target_length:
         return audio[:target_length]
@@ -16,17 +17,22 @@ def pad_or_truncate(audio, target_length=16000):
         return np.pad(audio, (0, target_length - len(audio)))
     return audio
 
+# Predict distillmos on commonvoice dataset and compare perofmrance
+# of three models: rules, small neural network, and deep neural network
 def predict_distillmos_on_commonvoice(num_samples=50):
     model = distillmos.ConvTransformerSQAModel()
     model.eval()
     
+    # Rules Model
     rules_predictor = RulesBasedMOSPredictor()
     feature_extractor = AudioFeatureExtractor()
+    # Shallow Model
     saved = joblib.load("inference/simple_neural_mos_model.joblib")
     nn_predictor = SimpleNeuralMOSPredictor()
     nn_predictor.scaler = saved['scaler']
     nn_predictor.model = saved['model']
     nn_predictor.feature_names = saved['feature_names']
+    # Deep Network
     deep_network_predictor = load_model()
 
     dataset = load_dataset("mozilla-foundation/common_voice_13_0", "en", split="train", streaming=True)
@@ -45,10 +51,12 @@ def predict_distillmos_on_commonvoice(num_samples=50):
     features_list = []
     valid_indices = []
     
+    # Loop for rule and deep model prediction 
     for i, audio in enumerate(processed_audio):
         try:
             features = feature_extractor.extract_all_features(torch.tensor(audio), sampling_rate)
             feature_values = list(features.values())
+            # Error handlign for any corrupted audio files
             if any(np.isinf(val) for val in feature_values if isinstance(val, (int, float))) or \
                any(np.isnan(val) for val in feature_values if isinstance(val, (int, float))):
                 continue
@@ -68,6 +76,7 @@ def predict_distillmos_on_commonvoice(num_samples=50):
 
     rules_predictions = np.array(rules_predictions)
     distillmos_predictions = distillmos_predictions[valid_indices]
+    # Make Small Network Batch Predictions
     small_network_predictions = nn_predictor.predict(features_list)
     
     distillmos_np = distillmos_predictions.detach().cpu().numpy().reshape(-1)
@@ -87,8 +96,7 @@ def predict_distillmos_on_commonvoice(num_samples=50):
     }
 
 if __name__ == "__main__":
-    results = predict_distillmos_on_commonvoice(500)
-    print("SMALL NETWORK PREDICTIONS", results['small_network_predictions'])
+    results = predict_distillmos_on_commonvoice(50)
     print("\nMSE between  Rule predictions:", results['rules_mse'])
     print("\nMSE between  Deep Network predictions:", results['deep_network_mse'])
     print("\nMSE between  Small Network predictions:", results['small_network_mse'])

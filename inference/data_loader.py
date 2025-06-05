@@ -6,12 +6,14 @@ import os
 from torch.utils.data import Dataset, DataLoader, random_split
 from simple_feature_extraction import AudioFeatureExtractor
 
+
+# MOS dataset class
+# Uses local data files in the data folder. Uses json file to map audio files to their mos scores. 
 class MOSDataset(Dataset):
     def __init__(self, data_path='./data/mos_scores.json'):
         self.mos_scores = json.load(open(data_path))
         self.data = []
         
-        # Process all datasets
         for key, value in self.mos_scores.items():
             for idx, mos in value:
                 audio_path = f'data/{key}/{key}_{idx}.wav'
@@ -39,10 +41,8 @@ class MOSDataset(Dataset):
             audio, sr = torchaudio.load(item['audio_path'])
 
             feature_extractor = AudioFeatureExtractor()
-            # print("MADE It HERE 2")
             features = feature_extractor.extract_all_features(audio, sr)
             features_tensor = feature_extractor.features_to_tensor(features)
-            # print("MADE It HERE")
             return {
                 'audio': audio,
                 'mos_score': torch.tensor(item['mos_score'], dtype=torch.float32),
@@ -56,10 +56,10 @@ class MOSDataset(Dataset):
                 'audio': torch.zeros(1, 16000),  # Assuming 1 second of audio at 16kHz
                 'mos_score': torch.tensor(item['mos_score'], dtype=torch.float32),
                 'dataset': item['dataset'],
-                'features': torch.zeros(1, 128)  # Adjust size based on your feature dimensions
+                'features': torch.zeros(1, 64)  
             }
 
-def get_dataloaders(train_ratio=0.8, batch_size=1, num_workers=0):  # Set num_workers to 0
+def get_dataloaders(train_ratio=0.8, batch_size=1, num_workers=0):  
     """
     Create train and test dataloaders with limited batches for quick testing.
     
@@ -103,32 +103,3 @@ def get_dataloaders(train_ratio=0.8, batch_size=1, num_workers=0):  # Set num_wo
     
     print(f"Created dataloaders with {len(train_dataloader)} training batches and {len(test_dataloader)} test batches")
     return train_dataloader, test_dataloader
-
-# # Example usage:
-# if __name__ == "__main__":
-#     try:
-#         train_dataloader, test_dataloader = get_dataloaders()
-        
-#         # Print some information about the datasets
-#         print(f"Number of training batches: {len(train_dataloader)}")
-#         print(f"Number of test batches: {len(test_dataloader)}")
-        
-#         # Print first batch of training data
-#         for batch in train_dataloader:
-#             print("\nTraining batch example:")
-#             print(f"Audio shape: {batch['audio'].shape}")
-#             print(f"MOS scores: {batch['mos_score']}")
-#             print(f"Dataset: {batch['dataset']}")
-#             print(f"Features shape: {batch['features'].shape}")
-#             break
-        
-#         # Print first batch of test data
-#         for batch in test_dataloader:
-#             print("\nTest batch example:")
-#             print(f"Audio shape: {batch['audio'].shape}")
-#             print(f"MOS scores: {batch['mos_score']}")
-#             print(f"Dataset: {batch['dataset']}")
-#             print(f"Features shape: {batch['features'].shape}")
-#             break
-#     except Exception as e:
-#         print(f"Error during dataloader creation or iteration: {str(e)}")  

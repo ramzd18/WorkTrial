@@ -28,7 +28,7 @@ warnings.filterwarnings('ignore')
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  
 
 class AudioFeatureExtractor:
-    """Extract comprehensive audio features for MOS prediction"""
+    # Extract comprehensive audio features for MOS prediction
     
     def __init__(self, sr=16000):
         self.sr = sr
@@ -49,7 +49,7 @@ class AudioFeatureExtractor:
         self.recognizer = KaldiRecognizer(self.vosk_model, self.sr)
     
     def vad_based_snr(self, audio, sr=16000):
-        """Calculate SNR using Voice Activity Detection"""
+        # Calculate SNR using Voice Activity Detection
         vad = webrtcvad.Vad(3)  
         audio_int16 = (audio * 32767).to(torch.int16)
         frame_length = 480 
@@ -74,7 +74,7 @@ class AudioFeatureExtractor:
             return 0
     
     def extract_silence_percentage(self, audio):
-        """Extract percentage of silence using WebRTC VAD"""
+        # Extract percentage of silence using WebRTC VAD
         audio_int16 = (audio * 32767).to(torch.int16)
         frame_length = 480
         frames = []
@@ -91,7 +91,7 @@ class AudioFeatureExtractor:
         return silence_ratio
     
     def extract_speaking_rate(self, audio, sr=16000):
-        """Extract speaking rate using Vosk ASR"""
+        # Extract speaking rate using Vosk ASR
         try:
             audio_int16 = (audio * 32767).to(torch.int16)
             chunk_size = 4000  
@@ -136,13 +136,13 @@ class AudioFeatureExtractor:
             return 0, 0, len(audio) / sr
     
     def extract_clipping(self, audio):
-        """Detect audio clipping"""
+        # Detect audio clipping
         audio_norm = audio / (torch.max(torch.abs(audio)) + 1e-8)
         clipping_ratio = torch.mean((torch.abs(audio_norm) >= 0.99).float())
         return clipping_ratio.item()
     
     def extract_reverberation_proxy(self, audio):
-        """Extract reverberation proxy using spectral decay"""
+        # Extract reverberation proxy using spectral decay
         audio_np = audio.numpy()
         f, psd = signal.welch(audio_np, fs=self.sr, nperseg=1024)        
         psd_db = 10 * np.log10(psd + 1e-8)
@@ -158,7 +158,7 @@ class AudioFeatureExtractor:
         return abs(slope), env_kurtosis
     
     def extract_spectral_features(self, audio):
-        """Extract MFCC and other spectral features with consistent dimensions"""
+        # Extract MFCC and other spectral features with consistent dimensions
         if len(audio.shape) > 1:
             audio = audio.squeeze()
             

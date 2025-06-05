@@ -5,9 +5,10 @@ import torchaudio.transforms as T
 from data_loader import get_dataloaders
 from tqdm import tqdm
 
-class SpectrogramCNN(nn.Module):
-    """2D CNN for processing spectrograms"""
-    
+# CNN class to process spectrograms
+# 4 conv layers with dropout and norm layers
+# Size invariant to audio length
+class SpectrogramCNN(nn.Module):    
     def __init__(self):
         super(SpectrogramCNN, self).__init__()
         
@@ -46,8 +47,10 @@ class SpectrogramCNN(nn.Module):
         x = x.view(x.size(0), -1) 
         return x
     
+# LSTM class to process temporal features
+# 5 layers with dropout and bidirectional
+# Outputs a single vector
 class TemporalLSTM(nn.Module):
-    """LSTM for capturing temporal patterns"""
     
     def __init__(self, input_size, hidden_size=512, num_layers=5):
         super(TemporalLSTM, self).__init__()
@@ -69,11 +72,15 @@ class TemporalLSTM(nn.Module):
         forward_h = hidden[-2]    
         backward_h = hidden[-1]           
         final_h = torch.cat((forward_h, backward_h), dim=1)
-        # print("FINAL H SHAPE", final_h.shape)
         return final_h
     
+# MultiModalMOSPredictor class to combine spectrogram and temporal features
+# 1. SpectrogramCNN: Processes audio into spectrograms
+# 2. TemporalLSTM: Processes temporal features
+# 3. FeatureProcessor: Processes features
+# 4. FusionNetwork: Combines features
+# 5. OutputActivation: Sigmoid activation
 class MultiModalMOSPredictor(nn.Module):
-    """Complete MOS prediction model combining multiple modalities"""
     
     def __init__(self, feature_dim, num_classes=1):
         super(MultiModalMOSPredictor, self).__init__()
@@ -91,7 +98,6 @@ class MultiModalMOSPredictor(nn.Module):
             nn.Dropout(0.3)
         )
         fusion_input_size = self.temporal_lstm.output_size + 64
-        # print("FUSION INPUT SIZE", fusion_input_size)
 
         self.fusion_network = nn.Sequential(
             nn.Linear(fusion_input_size, 256),
@@ -109,30 +115,30 @@ class MultiModalMOSPredictor(nn.Module):
         self.output_activation = nn.Sigmoid()
         
     def forward(self, audio, features):
+        # Remove unneeded audio dimensions
         audio = audio.squeeze(1)
         batch_size = audio.size(0)
         audio_length = audio.size(1)
-        # print("AUDIO LENGTH", audio.shape)
         processed_features = self.feature_processor(features)
-        # print("PROCESSED FEATURES SHAPE", processed_features.shape)
         chunks = []
         num_chunks = audio_length // self.chunk_size
-        # No chunking: process the whole audio in one shot with the CNN
+
         spec_features = self.spectrogram_cnn(audio)
-        # print("SPEC FEATURES SHAPE", spec_features.shape)
-        temporal_input = spec_features.unsqueeze(1)  # Add sequence dimension for LSTM compatibility
+        # Add sequence dimension for LSTM dimension expectations
+        temporal_input = spec_features.unsqueeze(1)  
         temporal_features = self.temporal_lstm(temporal_input)
-        # print("TEMPORAL FEATURES SHAPE", temporal_features.shape)
+        # Fuse together temporal and processed features from feature processor
         combined_features = torch.cat([temporal_features, processed_features], dim=1)
-        # print("COMBINED FEATURES SHAPE", combined_features.shape)
         output = self.fusion_network(combined_features)
-        # print("FINSIHED W THAT")
         output = self.output_activation(output) * 4 + 1
         
         return output
     
+# MOSTrainer class to train the model
+# 1. Initializes the model, optimizer, and scheduler
+# 2. Trains the model for a given number of epochs
+# 3. Saves the best model
 class MOSTrainer:
-    """Training utilities for the MOS prediction model"""
     
     def __init__(self, model, device='cuda' if torch.cuda.is_available() else 'cpu'):
         self.model = model.to(device)
@@ -142,9 +148,9 @@ class MOSTrainer:
         self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             self.optimizer, patience=5, factor=0.5
         )
-        
+
+    # Single batch train step 
     def train_epoch(self, batch):
-        """Process a single batch during training"""
         audio = batch['audio'].to(self.device)
         features = batch['features'].to(self.device)
         mos = batch['mos_score'].to(self.device)
@@ -160,8 +166,8 @@ class MOSTrainer:
         
         return loss.item()
     
+    # Single batch validation step
     def validate(self, batch):
-        """Process a single batch during validation"""
         audio = batch['audio'].to(self.device)
         features = batch['features'].to(self.device)
         mos = batch['mos_score'].to(self.device)
@@ -171,8 +177,8 @@ class MOSTrainer:
         
         return loss.item()
     
+    # Main training loop with progress bars
     def train(self, train_loader, val_loader, num_epochs=30):
-        """Main training loop with progress bars"""
         best_val_loss = float('inf')
         
         for epoch in range(num_epochs):

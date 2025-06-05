@@ -6,7 +6,7 @@ from deep_network import MultiModalMOSPredictor
 from simple_feature_extraction import AudioFeatureExtractor
 
 def load_model(model_path='inference/mos_deep_network.pth', device='cuda' if torch.cuda.is_available() else 'cpu'):
-    """Load the saved model"""
+    # Load the saved model
     model = MultiModalMOSPredictor(feature_dim=64)
     model.load_state_dict(torch.load(model_path, map_location=device, weights_only=False))
     model.to(device)
@@ -14,7 +14,7 @@ def load_model(model_path='inference/mos_deep_network.pth', device='cuda' if tor
     return model
 
 def process_audio(audio_path, model, device='cuda' if torch.cuda.is_available() else 'cpu'):
-    """Process a single audio file and get MOS prediction"""
+    # Process a single audio file and get MOS prediction
     # Load audio
     audio, sr = torchaudio.load(audio_path)
     feature_extractor = AudioFeatureExtractor()

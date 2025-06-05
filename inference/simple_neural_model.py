@@ -4,7 +4,7 @@ from sklearn.neural_network import MLPRegressor
 
 
 class SimpleNeuralMOSPredictor:
-    """Simple neural network for MOS prediction"""
+    # Simple neural network for MOS prediction
     
     def __init__(self):
         self.scaler = StandardScaler()
@@ -20,7 +20,7 @@ class SimpleNeuralMOSPredictor:
         self.feature_names = None
     
     def features_to_array(self, features_list):
-        """Convert list of feature dictionaries to numpy array"""
+        # Convert list of feature dictionaries to numpy array
         if not features_list:
             return np.array([])
         
@@ -64,14 +64,14 @@ class SimpleNeuralMOSPredictor:
         return np.array(feature_arrays)
     
     def train(self, features_list, mos_scores):
-        """Train the neural network"""
+        # Train the neural network
         X = self.features_to_array(features_list)
         y = np.array(mos_scores)
         X_scaled = self.scaler.fit_transform(X)
         self.model.fit(X_scaled, y)
     
     def predict(self, features_list):
-        """Predict MOS scores"""
+        # Predict MOS scores
         X = self.features_to_array(features_list)
         X_scaled = self.scaler.transform(X)
         predictions = self.model.predict(X_scaled)        
